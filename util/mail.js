@@ -33,7 +33,9 @@ const token = crypto.randomBytes(20).toString("hex");
 /*============================   SEND EMAIL VERIFICATION LINK   ============================*/
 
 const sendEmailVerification = async (user) => {
-  const link = `http://${IP.trim()}:${PORT}/api/users/verifyemail/${token}`;
+  const URL = "https://api-auth-8end.onrender.com";
+  // const link = `http://${IP.trim()}:${PORT}/api/users/verifyemail/${token}`;
+  const link = `${URL}/api/users/verifyemail/${token}`;
   const encodedLink = encodeURI(link);
   console.log(IP);
   try {
