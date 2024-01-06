@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const prisma = require("../startup/db");
+const logger = require("../startup/log");
 
 let transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -29,11 +30,11 @@ const buttonStyle = `
 const IP = process.env.IP;
 const PORT = process.env.PORT;
 const token = crypto.randomBytes(20).toString("hex");
+const URL = "https://api-auth-8end.onrender.com";
 
 /*============================   SEND EMAIL VERIFICATION LINK   ============================*/
 
 const sendEmailVerification = async (user) => {
-  const URL = "https://api-auth-8end.onrender.com";
   // const link = `http://${IP.trim()}:${PORT}/api/users/verifyemail/${token}`;
   const link = `${URL}/api/users/verifyemail/${token}`;
   const encodedLink = encodeURI(link);
@@ -56,16 +57,16 @@ const sendEmailVerification = async (user) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("Email verification link sent to " + user.email);
+    logger.log("Email verification link sent to " + user.email);
   } catch (error) {
-    console.log("Failed to send email verification link: ", error);
+    logger.log("Failed to send email verification link: ", error);
   }
 };
 
 /*============================   SEND PASSWORD RESET LINK     ============================*/
 
 const sendPasswordReset = async ({ user }) => {
-  const link = `http://${IP.trim()}:${PORT}/api/users/resetPassword/${token}`;
+  const link = `${URL}/api/users/resetPassword/${token}`;
   const encodedLink = encodeURI(link);
 
   try {
@@ -86,7 +87,7 @@ const sendPasswordReset = async ({ user }) => {
 
     await transporter.sendMail(mailOptions);
   } catch (error) {
-    console.log("Failed to send email verification link: ", error);
+    logger.log("Failed to send email verification link: ", error);
   }
 };
 

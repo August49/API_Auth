@@ -1,5 +1,5 @@
 const prisma = require("../startup/db");
-const { hashpass } = require("../util/auth");
+const { hashpass, generateAuthToken } = require("../util/auth");
 const { sendEmailVerification } = require("../util/mail");
 const { validateUser } = require("../validators/user");
 
@@ -22,11 +22,10 @@ const createNewUser = async (req, res) => {
       password: hashedPassword,
     },
   });
+  const token = generateAuthToken(user);
   sendEmailVerification(user);
 
-  res
-    .json({ message: "User created successfully", username: user.username })
-    .status(200);
+  res.status(201).json({ message: "User created successfully", token: token });
 };
 
 const verifyEmail = async (req, res) => {
