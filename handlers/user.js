@@ -29,6 +29,31 @@ const createNewUser = async (req, res) => {
     .status(200);
 };
 
+const verifyEmail = async (req, res) => {
+  const { token } = req.params;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      emailVerificationToken: token,
+    },
+  });
+
+  if (!user) return res.status(400).json({ message: "invalid token" });
+
+  await prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      emailVerified: true,
+      emailVerificationToken: null,
+    },
+  });
+
+  res.json({ message: "email verified" }).status(200);
+};
+
 module.exports = {
   createNewUser: createNewUser,
+  verifyEmail: verifyEmail,
 };

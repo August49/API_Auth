@@ -37,7 +37,7 @@ const sendEmailVerification = async (user) => {
   // const link = `http://${IP.trim()}:${PORT}/api/users/verifyemail/${token}`;
   const link = `${URL}/api/users/verifyemail/${token}`;
   const encodedLink = encodeURI(link);
-  console.log(IP);
+
   try {
     await prisma.user.update({
       where: { id: user.id },
