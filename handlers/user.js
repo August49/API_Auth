@@ -22,7 +22,8 @@ const createNewUser = async (req, res) => {
       password: hashedPassword,
     },
   });
-  const token = generateAuthToken(user);
+  const token = await generateAuthToken(user);
+
   sendEmailVerification(user);
 
   res.status(201).json({ message: "User created successfully", token: token });

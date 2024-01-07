@@ -59,7 +59,7 @@ const sendEmailVerification = async (user) => {
     await transporter.sendMail(mailOptions);
     logger.log("Email verification link sent to " + user.email);
   } catch (error) {
-    logger.log("Failed to send email verification link: ", error);
+    logger.log("error", "Failed to send email verification link: ", error);
   }
 };
 
@@ -87,7 +87,7 @@ const sendPasswordReset = async ({ user }) => {
 
     await transporter.sendMail(mailOptions);
   } catch (error) {
-    logger.log("Failed to send email verification link: ", error);
+    logger.log("error", "Failed to send email verification link: ", error);
   }
 };
 

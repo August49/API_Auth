@@ -14,7 +14,7 @@ const comparePass = async (password, hashedPassword) => {
 };
 
 const generateAuthToken = async (user) => {
-  const token = await jwt.sign({ id: user.id, email: user.email }, secret, {
+  const token = await jwt.sign({ id: user.id, role: user.role }, secret, {
     expiresIn: "2h",
   });
   return token;
