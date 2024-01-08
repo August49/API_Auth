@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const secret = process.env.JWT_SECRET;
 
-const hashpasss = async (password) => {
+const hashpass = async (password) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   return hashedPassword;
@@ -13,9 +13,9 @@ const comparePass = async (password, hashedPassword) => {
   return validPassword;
 };
 
-const generateAuthToken = async (user) => {
+const generateAuthToken = async (user, exp = "1h") => {
   const token = await jwt.sign({ id: user.id, email: user.email }, secret, {
-    expiresIn: "2h",
+    expiresIn: exp,
   });
   return token;
 };
@@ -39,8 +39,8 @@ const authn = (req, res, next) => {
 };
 
 module.exports = {
-  hashpass: hashpasss,
-  comparePass: comparePass,
-  generateAuthToken: generateAuthToken,
-  authn: authn,
+  hashpass,
+  comparePass,
+  generateAuthToken,
+  authn,
 };

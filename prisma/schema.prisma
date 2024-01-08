@@ -40,10 +40,13 @@ model User {
   password                  String
   passwordResetToken        String?   @unique
   passwordResetTokenExpires DateTime? 
-
+  refreshToken              String?
   currentChallenge String?
   webAuthenToken Boolean @default(false)
   
+  failedLoginAttempts Int @default(0)
+  accountLockedUntil DateTime?
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   authenticators Authenticator[]
