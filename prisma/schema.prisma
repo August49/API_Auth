@@ -44,7 +44,7 @@ model User {
   currentChallenge String?
   webAuthenToken Boolean @default(false)
   
-  failedLoginAttempts Int @default(0)
+  failedLoginAttempts Int? @default(0)
   accountLockedUntil DateTime?
 
   createdAt DateTime  @default(now())
