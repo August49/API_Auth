@@ -29,8 +29,11 @@ CREATE TABLE "User" (
     "password" TEXT NOT NULL,
     "passwordResetToken" TEXT,
     "passwordResetTokenExpires" TIMESTAMP(3),
+    "refreshToken" TEXT,
     "currentChallenge" TEXT,
     "webAuthenToken" BOOLEAN NOT NULL DEFAULT false,
+    "failedLoginAttempts" INTEGER NOT NULL DEFAULT 0,
+    "accountLockedUntil" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
