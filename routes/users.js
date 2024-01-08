@@ -10,10 +10,17 @@ const {
   resetPassword,
 } = require("../handlers/user");
 const asyncMiddleware = require("../middleware/asyncMiddleware");
+const rateLimit = require("express-rate-limit");
 const express = require("express");
 const { authn } = require("../util/auth");
-const limit = require("../util/limiter");
 const router = express.Router();
+
+const limit = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
+  message:
+    "Too many accounts created from this IP, please try again after an hour",
+});
 
 /*============================   SIGN UP ROUTES   ============================*/
 router.post("/newUser", limit, asyncMiddleware(createNewUser));
