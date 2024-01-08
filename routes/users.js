@@ -17,7 +17,7 @@ const router = express.Router();
 
 const limit = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5,
+  max: 50,
   message:
     "Too many accounts created from this IP, please try again after an hour",
 });
