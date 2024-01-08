@@ -57,18 +57,17 @@ const sendEmailVerification = async (user) => {
     };
 
     await transporter.sendMail(mailOptions);
-    logger.log("Email verification link sent to " + user.email);
+    logger.info("Email verification link sent to " + user.email);
   } catch (error) {
-    logger.log("Failed to send email verification link: ", error);
+    logger.error("Failed to send email verification link: ", error);
   }
 };
 
 /*============================   SEND PASSWORD RESET LINK     ============================*/
 
-const sendPasswordReset = async ({ user }) => {
+const sendPasswordReset = async (user) => {
   const link = `${URL}/api/users/resetPassword/${token}`;
   const encodedLink = encodeURI(link);
-
   try {
     await prisma.user.update({
       where: { id: user.id },
@@ -87,7 +86,7 @@ const sendPasswordReset = async ({ user }) => {
 
     await transporter.sendMail(mailOptions);
   } catch (error) {
-    logger.log("Failed to send email verification link: ", error);
+    logger.error("Failed to send email verification link: ", error);
   }
 };
 

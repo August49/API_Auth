@@ -11,15 +11,24 @@ const loginSchema = joi.object({
   password: joi.string().min(8).required(),
 });
 
+const emailSchema = joi.object({
+  email: joi.string().email().required(),
+});
+
+function validateEmail(email) {
+  return emailSchema.validate(email);
+}
+
 function validateUser(user) {
   return userSchema.validate(user);
 }
 
-function validateLogin(user) {
+function validateSignIn(user) {
   return loginSchema.validate(user);
 }
 
 module.exports = {
   validateUser,
-  validateLogin,
+  validateSignIn,
+  validateEmail,
 };
