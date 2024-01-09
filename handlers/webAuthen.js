@@ -11,13 +11,12 @@ const {
 } = require("@simplewebauthn/server/helpers");
 const { generateAuthToken } = require("../util/auth");
 const logger = require("../startup/log");
-const rpName = "SimpleWebAuthn Example";
-// A unique identifier for your website
-const rpID = "api-auth-8end.onrender.com";
-// const rpID = "localhost"
-// The URL at which registrations and authentications should occur
-const origin = process.env.ORIGIN;
+// const rpName = "SimpleWebAuthn Example";
+// const rpID = "localhost";
 // const origin = `http://${rpID}:3000`;
+const rpName = "SimpleWebAuthn Example";
+const rpID = "api-auth-8end.onrender.com";
+const origin = `https://${rpID}`;
 const rememberMe = true;
 
 const registrationOptions = async (req, res) => {
@@ -32,8 +31,8 @@ const registrationOptions = async (req, res) => {
   }
 
   const options = await generateRegistrationOptions({
-    rpName: "SimpleWebAuthn Example",
-    rpID: "api-auth-8end.onrender.com",
+    rpName,
+    rpID,
     userID: user.id.toString(),
     userName: user.username,
     attestationType: "none",
