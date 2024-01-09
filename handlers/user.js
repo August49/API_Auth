@@ -152,6 +152,7 @@ const getUser = async (req, res) => {
   if (!user) return res.status(200).json({ message: "user not found" });
 
   res.status(200).json({
+    name: user.id,
     token: user.webAuthenToken,
   });
 };

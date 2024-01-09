@@ -14,14 +14,23 @@ const comparePass = async (password, hashedPassword) => {
 };
 
 const generateAuthToken = async (user, exp = "1h") => {
-  const token = await jwt.sign({ id: user.id, email: user.email }, secret, {
+  const token = await jwt.sign({ id: user.id }, secret, {
     expiresIn: exp,
   });
   return token;
 };
 
 const authn = (req, res, next) => {
-  const token = req.header("Authorization").replace("Bearer ", "");
+  const authHeader = req.header("Authorization");
+
+  if (!authHeader) {
+    return res.status(401).json({
+      message: "Authentication failed: No Authorization header provided",
+    });
+  }
+
+  const token = authHeader.split(" ")[1];
+  console.log(token);
 
   if (!token) {
     return res
