@@ -9,6 +9,7 @@ const userSchema = joi.object({
 const loginSchema = joi.object({
   email: joi.string().email().required(),
   password: joi.string().min(8).required(),
+  rememberMe: joi.boolean().required(),
 });
 
 const emailSchema = joi.object({
