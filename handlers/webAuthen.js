@@ -15,10 +15,17 @@ const logger = require("../startup/log");
 // const rpID = "localhost";
 // const origin = `http://${rpID}:3000`;
 const rpName = "SimpleWebAuthn Example";
-const rpID = "api-auth-8end.onrender.com";
-const origin = `https://${rpID}`;
+const rpID =
+  process.env.NODE_ENV === "production"
+    ? "api-auth-8end.onrender.com"
+    : "localhost";
+const origin =
+  process.env.NODE_ENV === "production"
+    ? `https://${rpID}`
+    : `http://${rpID}:3000`;
 const rememberMe = true;
 
+console.log(process.env.NODE_ENV);
 const registrationOptions = async (req, res) => {
   const { id } = req.user;
   const user = await prisma.user.findUnique({
