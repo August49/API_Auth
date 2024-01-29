@@ -8,6 +8,7 @@ const {
   signOut,
   sendPasswordResetLink,
   resetPassword,
+  enquiry,
 } = require("../handlers/user");
 const asyncMiddleware = require("../middleware/asyncMiddleware");
 const rateLimit = require("express-rate-limit");
@@ -35,6 +36,7 @@ router.post("/signIn", limit, asyncMiddleware(signIn));
 router.post("/me", authn, asyncMiddleware(currentUser));
 router.post("/options", asyncMiddleware(getUser));
 router.post("/signOut", asyncMiddleware(signOut));
+router.post("/enquiry", asyncMiddleware(enquiry));
 /*============================   ACCOUNT  RECOVERY     ============================*/
 router.post("/reset", asyncMiddleware(sendPasswordResetLink));
 router.post("/reset/:token", asyncMiddleware(resetPassword));

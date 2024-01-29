@@ -12,9 +12,19 @@ const loginSchema = joi.object({
   rememberMe: joi.boolean().required(),
 });
 
+const enquirySchema = joi.object({
+  name: joi.string().required(),
+  email: joi.string().email().required(),
+  message: joi.string().required().min(10).max(200),
+});
+
 const emailSchema = joi.object({
   email: joi.string().email().required(),
 });
+
+function validateEnquiry(enquiry) {
+  return enquirySchema.validate(enquiry);
+}
 
 function validateEmail(email) {
   return emailSchema.validate(email);
@@ -32,4 +42,5 @@ module.exports = {
   validateUser,
   validateSignIn,
   validateEmail,
+  validateEnquiry,
 };
