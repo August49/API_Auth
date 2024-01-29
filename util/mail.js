@@ -90,7 +90,25 @@ const sendPasswordReset = async (user) => {
   }
 };
 
+const sendEmail = async (name, email, message) => {
+  try {
+    let mailOptions = {
+      from: email,
+      to: process.env.EMAIL_USERNAME,
+      subject: "Enquiry",
+      html: `<p>Name: ${name}</p>
+             <p>Email: ${email}</p>
+             <p>Message: ${message}</p>`,
+    };
+
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    logger.error("Failed to send email verification link: ", error);
+  }
+};
+
 module.exports = {
   sendEmailVerification,
   sendPasswordReset,
+  sendEmail,
 };

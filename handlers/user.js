@@ -1,10 +1,15 @@
 const prisma = require("../startup/db");
 const { hashpass, generateAuthToken, comparePass } = require("../util/auth");
-const { sendEmailVerification, sendPasswordReset } = require("../util/mail");
+const {
+  sendEmailVerification,
+  sendPasswordReset,
+  sendEmail,
+} = require("../util/mail");
 const {
   validateUser,
   validateSignIn,
   validateEmail,
+  validateEnquiry,
 } = require("../validators/user");
 /*============================   SIGN UP ROUTES   ============================*/
 const createNewUser = async (req, res) => {
@@ -224,6 +229,17 @@ const resetPassword = async (req, res) => {
   res.json({ message: "password reset successful" }).status(200);
 };
 
+const enquiry = async (req, res) => {
+  const { error, value } = validateEnquiry(req.body);
+  if (error) return res.status(400).json({ message: error.message });
+
+  const { name, email, message } = value;
+
+  await sendEmail(name, email, message);
+
+  res.json({ message: "Enquiry received" });
+};
+
 module.exports = {
   createNewUser,
   verifyEmail,
@@ -234,4 +250,5 @@ module.exports = {
   signOut,
   sendPasswordResetLink,
   resetPassword,
+  enquiry,
 };
