@@ -8,16 +8,17 @@ const webauthnRouter = require("../routes/webauthen");
 
 module.exports = function (app) {
   app.use(express.json());
-  app.use(
-    cors({
-      origin: [
-        "http://localhost:3000",
-        "https://api-auth-8end.onrender.com",
-        "https://api-auth-8end.onrender.com/",
-      ],
-      optionsSuccessStatus: 200,
-    })
-  );
+  // app.use(
+  //   cors({
+  //     origin: [
+  //       "http://localhost:3000",
+  //       "https://api-auth-8end.onrender.com",
+  //       "https://api-auth-8end.onrender.com/",
+  //     ],
+  //     optionsSuccessStatus: 200,
+  //   })
+  // );
+  app.use(cors());
   app.use(bodyParser.json());
   app.use(
     helmet.contentSecurityPolicy({
