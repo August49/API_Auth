@@ -16,9 +16,7 @@ const logger = require("../startup/log");
 // const origin = `http://${rpID}:3000`;
 const rpName = "SimpleWebAuthn Example";
 const rpID =
-  process.env.NODE_ENV === "production"
-    ? "api-auth-8end.onrender.com"
-    : "localhost";
+  process.env.NODE_ENV === "production" ? process.env.RP_ID : "localhost";
 const origin =
   process.env.NODE_ENV === "production"
     ? `https://${rpID}`
