@@ -100,7 +100,7 @@ const verifyRegistration = async (req, res) => {
     verification = await verifyRegistrationResponse({
       ...options,
       expectedChallenge: `${expectedChallenge}`,
-      expectedOrigin: origin,
+      expectedOrigin: "https://www.augustiniusjosephn.social",
       expectedRPID: rpID,
       requireUserVerification: true,
     });
