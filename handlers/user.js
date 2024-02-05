@@ -40,7 +40,7 @@ const createNewUser = async (req, res) => {
 
   res.status(201).json({
     message:
-      "There was an error with your registration. Please try registering again.",
+      "User created successfully. Please check your email to verify your account",
     token: token,
   });
 };
