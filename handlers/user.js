@@ -19,7 +19,11 @@ const createNewUser = async (req, res) => {
   const { username, email, password } = value;
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) {
-    return res.status(400).send("User with this email already exists");
+    return res
+      .status(400)
+      .send(
+        "There was an error with your registration. Please try registering again."
+      );
   }
 
   const hashedPassword = await hashpass(password);
@@ -36,7 +40,7 @@ const createNewUser = async (req, res) => {
 
   res.status(201).json({
     message:
-      "There was an error with your registration. Please try registering again.",
+      "User created successfully. Please check your email to verify your account",
     token: token,
   });
 };
