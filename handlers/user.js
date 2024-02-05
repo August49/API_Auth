@@ -38,7 +38,11 @@ const createNewUser = async (req, res) => {
   const token = await generateAuthToken(user, "1h");
   sendEmailVerification(user);
 
-  res.status(201).json({ message: "User created successfully", token: token });
+  res.status(201).json({
+    message:
+      "There was an error with your registration. Please try registering again.",
+    token: token,
+  });
 };
 
 const verifyEmail = async (req, res) => {
