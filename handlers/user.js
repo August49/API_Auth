@@ -11,6 +11,8 @@ const {
   validateEmail,
   validateEnquiry,
 } = require("../validators/user");
+const NodeCache = require("node-cache");
+const myCache = new NodeCache();
 /*============================   SIGN UP ROUTES   ============================*/
 const createNewUser = async (req, res) => {
   const { error, value } = validateUser(req.body);
@@ -162,17 +164,35 @@ const getUser = async (req, res) => {
   const { error, value } = validateEmail(req.body);
   if (error) return res.status(400).json({ message: error.message });
   const { email } = value;
-  const user = await prisma.user.findUnique({
-    where: { email: email },
-  });
-  if (!user) return res.status(200).json({ message: "user not found" });
 
-  res.status(200).json({
-    name: user.id,
-    token: user.webAuthenToken,
-  });
+  // Try getting user data from cache
+  const cachedUser = myCache.get(email);
+
+  if (cachedUser) {
+    return res.status(200).json(cachedUser);
+  } else {
+    // If not in cache, get from database
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+    });
+    if (!user) return res.status(200).json({ message: "user not found" });
+
+    // Store user data in cache
+    myCache.set(
+      email,
+      {
+        name: user.id,
+        token: user.webAuthenToken,
+      },
+      3600
+    );
+
+    res.status(200).json({
+      name: user.id,
+      token: user.webAuthenToken,
+    });
+  }
 };
-
 /*============================   ACCOUNT  RECOVERY     ============================*/
 const sendPasswordResetLink = async (req, res) => {
   const { error, value } = validateEmail(req.body);
