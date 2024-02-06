@@ -60,13 +60,12 @@ const registrationOptions = async (req, res) => {
     where: { id: id },
     data: { currentChallenge: options.challenge },
   });
-  logger.info("Registration options generated", options);
 
   res.json(options);
 };
 
 const verifyRegistration = async (req, res) => {
-  const body = req.body.data;
+  const body = req.body;
   const { id } = req.user;
 
   // Retrieve the logged-in user
@@ -79,7 +78,9 @@ const verifyRegistration = async (req, res) => {
     return res.status(404).json({ error: "User not found" });
   }
 
-  logger.info("Verifying registration response", req.body);
+  if (!body || !body.id || !body.rawId || !body.response) {
+    return res.status(400).json({ error: "Invalid request body" });
+  }
 
   const expectedChallenge = user.currentChallenge;
   const options = {
