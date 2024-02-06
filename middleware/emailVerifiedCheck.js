@@ -1,5 +1,4 @@
 const emailVerified = async (req, res, next) => {
-  console.log(req.user);
   let user;
   try {
     user = await prisma.user.findUnique({

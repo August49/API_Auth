@@ -23,7 +23,6 @@ const origin =
     : `http://${rpID}:3000`;
 const rememberMe = true;
 
-console.log(process.env.NODE_ENV);
 const registrationOptions = async (req, res) => {
   const { id } = req.user;
   const user = await prisma.user.findUnique({
