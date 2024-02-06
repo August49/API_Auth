@@ -179,7 +179,9 @@ const webauthloginOptions = async (req, res) => {
 const webauthLoginVerification = async (req, res) => {
   const body = req.body.data;
   const email = req.body.data.email.email;
-
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
   const user = await prisma.user.findUnique({
     where: { email: email },
     include: { authenticators: true },
