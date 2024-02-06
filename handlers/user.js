@@ -93,25 +93,30 @@ const signIn = async (req, res) => {
 
   const { email, password, rememberMe } = value;
 
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-  });
-
-  if (!user)
-    return res.status(400).json({ message: "Invalid email or password." });
-  if (user.accountLockedUntil && user.accountLockedUntil > new Date())
-    return res.status(400).json({
-      message: "This account is temporarily locked. Please try again later.",
+  try {
+    let user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
     });
 
-  const isPasswordValid = await comparePass(password, user.password);
+    if (!user)
+      return res.status(400).json({ message: "Invalid email or password." });
+    if (user.accountLockedUntil && user.accountLockedUntil > new Date())
+      return res.status(400).json({
+        message: "This account is temporarily locked. Please try again later.",
+      });
 
-  if (!isPasswordValid) {
-    user.failedLoginAttempts += 1;
-    if (user.failedLoginAttempts >= 3) {
-      user.accountLockedUntil = new Date(Date.now() + 15 * 60 * 1000);
+    const isPasswordValid = await comparePass(password, user.password);
+
+    if (!isPasswordValid) {
+      user.failedLoginAttempts += 1;
+      if (user.failedLoginAttempts >= 3) {
+        user.accountLockedUntil = new Date(Date.now() + 15 * 60 * 1000);
+      }
+    } else {
+      user.failedLoginAttempts = 0;
+      user.accountLockedUntil = null;
     }
 
     await prisma.user.update({
@@ -121,21 +126,19 @@ const signIn = async (req, res) => {
         accountLockedUntil: user.accountLockedUntil,
       },
     });
-    return res.status(400).json({ message: "Invalid email or password." });
+
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Invalid email or password." });
+    }
+
+    const token = rememberMe
+      ? await generateAuthToken(user, "7d")
+      : await generateAuthToken(user);
+
+    res.status(200).json({ message: "Success", token: token });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
   }
-
-  await prisma.user.update({
-    where: { email: email },
-    data: { failedLoginAttempts: 0, accountLockedUntil: null },
-  });
-
-  const token = rememberMe
-    ? await generateAuthToken(user, "7d")
-    : await generateAuthToken(user);
-
-  res
-    .status(200)
-    .json({ message: "User logged in successfully", token: token });
 };
 
 const currentUser = async (req, res) => {

@@ -1,5 +1,6 @@
 const errorHandler = require("../middleware/errorHandler");
 const express = require("express");
+const compression = require("compression");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const cors = require("cors");
@@ -20,6 +21,7 @@ module.exports = function (app) {
   // );
   app.use(cors());
   app.use(bodyParser.json());
+  app.use(compression());
   app.use(
     helmet.contentSecurityPolicy({
       directives: {
