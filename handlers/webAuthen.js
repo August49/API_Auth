@@ -178,7 +178,8 @@ const webauthloginOptions = async (req, res) => {
 
 const webauthLoginVerification = async (req, res) => {
   const body = req.body.data;
-  const email = req.body.data.email.email;
+  const email = req.body.data.email;
+  console.log(email);
   if (!email) {
     return res.status(400).json({ error: "Email is required" });
   }
