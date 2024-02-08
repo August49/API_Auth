@@ -93,54 +93,47 @@ const signIn = async (req, res) => {
   const { error, value } = validateSignIn(req.body);
   if (error) return res.status(400).json({ message: error.message });
 
-  const { email, password, rememberMe } = value;
+  let { email, password, rememberMe } = value;
+  email = email.toLowerCase();
 
-  try {
-    let user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
+  let user = await prisma.user.findUnique({ where: { email } });
+  const invalidMessage = { message: "Invalid email or password." };
+
+  if (!user) return res.status(400).json(invalidMessage);
+
+  if (user.accountLockedUntil && user.accountLockedUntil > new Date())
+    return res.status(400).json({
+      message: "This account is temporarily locked. Please try again later.",
     });
 
-    if (!user)
-      return res.status(400).json({ message: "Invalid email or password." });
-    if (user.accountLockedUntil && user.accountLockedUntil > new Date())
-      return res.status(400).json({
-        message: "This account is temporarily locked. Please try again later.",
-      });
+  const isPasswordValid = await comparePass(password, user.password);
 
-    const isPasswordValid = await comparePass(password, user.password);
-
-    if (!isPasswordValid) {
-      user.failedLoginAttempts += 1;
-      if (user.failedLoginAttempts >= 3) {
-        user.accountLockedUntil = new Date(Date.now() + 15 * 60 * 1000);
-      }
-    } else {
-      user.failedLoginAttempts = 0;
-      user.accountLockedUntil = null;
+  if (!isPasswordValid) {
+    user.failedLoginAttempts += 1;
+    if (user.failedLoginAttempts >= 3) {
+      user.accountLockedUntil = new Date(Date.now() + 15 * 60 * 1000);
     }
-
-    await prisma.user.update({
-      where: { email: email },
-      data: {
-        failedLoginAttempts: user.failedLoginAttempts,
-        accountLockedUntil: user.accountLockedUntil,
-      },
-    });
-
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: "Invalid email or password." });
-    }
-
-    const token = rememberMe
-      ? await generateAuthToken(user, "7d")
-      : await generateAuthToken(user);
-
-    res.status(200).json({ message: "Success", token: token });
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+  } else {
+    user.failedLoginAttempts = 0;
+    user.accountLockedUntil = null;
   }
+
+  // Update the user in the database
+  await prisma.user.update({
+    where: { email: email },
+    data: {
+      failedLoginAttempts: user.failedLoginAttempts,
+      accountLockedUntil: user.accountLockedUntil,
+    },
+  });
+
+  if (!isPasswordValid) return res.status(400).json(invalidMessage);
+
+  const token = rememberMe
+    ? await generateAuthToken(user, "7d")
+    : await generateAuthToken(user);
+
+  res.status(200).json({ message: "Success", token: token });
 };
 
 const currentUser = async (req, res) => {
@@ -163,30 +156,32 @@ const signOut = async (req, res) => {
 const getUser = async (req, res) => {
   const { error, value } = validateEmail(req.body);
   if (error) return res.status(400).json({ message: error.message });
-  const { email } = value;
 
-  // Try getting user data from cache
+  let { email } = value;
+  email = email.toLowerCase();
+
   const cachedUser = myCache.get(email);
 
-  // Get user from database
   const user = await prisma.user.findUnique({
     where: { email: email },
   });
-  if (!user) return res.status(200).json({ message: "user not found" });
 
-  // If user is in cache and token hasn't changed, return cached user
-  if (cachedUser && cachedUser.token === user.webAuthenToken) {
-    return res.status(200).json(cachedUser);
-  } else {
-    // If user is not in cache or token has changed, update cache and return new user data
+  // If user is not in cache or token has changed, update cache
+  if (user && (!cachedUser || cachedUser.token !== user.webAuthenToken)) {
     const userData = {
       name: user.id,
       token: user.webAuthenToken,
     };
     myCache.set(email, userData, 3600);
-
-    return res.status(200).json(userData);
   }
+
+  const responseUser = myCache.get(email);
+
+  if (!responseUser) {
+    return res.status(200).json({ message: "Request processed." });
+  }
+
+  return res.status(200).json(responseUser);
 };
 /*============================   ACCOUNT  RECOVERY     ============================*/
 const sendPasswordResetLink = async (req, res) => {
