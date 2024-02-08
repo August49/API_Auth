@@ -65,8 +65,10 @@ const registrationOptions = async (req, res) => {
 };
 
 const verifyRegistration = async (req, res) => {
-  const body = req.body;
+  const body = req.body.data;
   const { id } = req.user;
+
+  console.log(body);
 
   // Retrieve the logged-in user
   const user = await prisma.user.findUnique({
