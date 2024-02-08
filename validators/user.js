@@ -35,8 +35,8 @@ const enquirySchema = joi
 
 const emailSchema = joi.object({
   email: joi.string().email().required().messages({
-    "string.email": "Invalid email",
-    "any.required": "Invalid email",
+    "string.email": "enter a valid email address",
+    "any.required": "enter a valid email address",
   }),
 });
 

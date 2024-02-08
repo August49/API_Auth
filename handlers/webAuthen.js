@@ -22,6 +22,7 @@ const origin =
     ? `https://${rpID}`
     : `http://${rpID}:3000`;
 const rememberMe = true;
+const expectedOrigin = origin || "https://www.augustiniusjosephn.social";
 
 const registrationOptions = async (req, res) => {
   const { id } = req.user;
@@ -68,8 +69,6 @@ const verifyRegistration = async (req, res) => {
   const body = req.body.data;
   const { id } = req.user;
 
-  console.log(body);
-
   // Retrieve the logged-in user
   const user = await prisma.user.findUnique({
     where: { id: id },
@@ -102,7 +101,7 @@ const verifyRegistration = async (req, res) => {
     verification = await verifyRegistrationResponse({
       ...options,
       expectedChallenge: `${expectedChallenge}`,
-      expectedOrigin: "https://www.augustiniusjosephn.social",
+      expectedOrigin: expectedOrigin,
       expectedRPID: rpID,
       requireUserVerification: true,
     });

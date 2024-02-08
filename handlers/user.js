@@ -168,29 +168,24 @@ const getUser = async (req, res) => {
   // Try getting user data from cache
   const cachedUser = myCache.get(email);
 
-  if (cachedUser) {
+  // Get user from database
+  const user = await prisma.user.findUnique({
+    where: { email: email },
+  });
+  if (!user) return res.status(200).json({ message: "user not found" });
+
+  // If user is in cache and token hasn't changed, return cached user
+  if (cachedUser && cachedUser.token === user.webAuthenToken) {
     return res.status(200).json(cachedUser);
   } else {
-    // If not in cache, get from database
-    const user = await prisma.user.findUnique({
-      where: { email: email },
-    });
-    if (!user) return res.status(200).json({ message: "user not found" });
-
-    // Store user data in cache
-    myCache.set(
-      email,
-      {
-        name: user.id,
-        token: user.webAuthenToken,
-      },
-      3600
-    );
-
-    res.status(200).json({
+    // If user is not in cache or token has changed, update cache and return new user data
+    const userData = {
       name: user.id,
       token: user.webAuthenToken,
-    });
+    };
+    myCache.set(email, userData, 3600);
+
+    return res.status(200).json(userData);
   }
 };
 /*============================   ACCOUNT  RECOVERY     ============================*/
