@@ -9,7 +9,7 @@ const {
   isoBase64URL,
   isoUint8Array,
 } = require("@simplewebauthn/server/helpers");
-const { generateAuthToken } = require("../util/auth");
+
 const logger = require("../startup/log");
 // const rpName = "SimpleWebAuthn Example";
 // const rpID = "localhost";
@@ -245,9 +245,15 @@ const webauthLoginVerification = async (req, res) => {
     return res.status(400).send({ error: "Verification failed" });
   }
 
-  const token = await generateAuthToken(user, "1h");
+  // Set the user data in the session
+  req.session.user = {
+    id: user.id,
+    role: user.role,
+    username: user.username,
+    email: user.email,
+  };
 
-  res.json({ verified, token });
+  res.json({ verified: verified, user: req.session.user });
 };
 
 module.exports = {

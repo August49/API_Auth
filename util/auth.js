@@ -1,6 +1,4 @@
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const secret = process.env.JWT_SECRET;
 
 const hashpass = async (password) => {
   const salt = await bcrypt.genSalt(10);
@@ -13,42 +11,24 @@ const comparePass = async (password, hashedPassword) => {
   return validPassword;
 };
 
-const generateAuthToken = async (user, exp = "1h") => {
-  const token = await jwt.sign({ id: user.id }, secret, {
-    expiresIn: exp,
-  });
-  return token;
-};
-
 const authn = (req, res, next) => {
-  const authHeader = req.header("Authorization");
-
-  if (!authHeader) {
-    return res.status(401).json({
-      message: "Authentication failed: No Authorization header provided",
-    });
-  }
-
-  const token = authHeader.split(" ")[1];
-  if (!token) {
+  console.log(req.session.user);
+  if (!req.session.user) {
     return res
       .status(401)
-      .json({ message: "Authentication failed: No token provided" });
+      .json({ message: "Authentication failed: No session" });
   }
 
   try {
-    const decoded = jwt.verify(token, secret);
-    console.log(decoded);
-    req.user = decoded;
+    req.user = req.session.user;
     next();
   } catch (error) {
-    res.status(401).json({ message: "Authentication failed: Invalid token" });
+    res.status(401).json({ message: "Authentication failed: Invalid session" });
   }
 };
 
 module.exports = {
   hashpass,
   comparePass,
-  generateAuthToken,
   authn,
 };

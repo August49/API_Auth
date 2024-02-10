@@ -33,7 +33,7 @@ router.post(
 
 /*============================   SIGN IN ROUTES   ============================*/
 router.post("/signIn", limit, asyncMiddleware(signIn));
-router.post("/me", authn, asyncMiddleware(currentUser));
+router.get("/me", authn, asyncMiddleware(currentUser));
 router.post("/options", asyncMiddleware(getUser));
 router.post("/signOut", asyncMiddleware(signOut));
 router.post("/enquiry", asyncMiddleware(enquiry));

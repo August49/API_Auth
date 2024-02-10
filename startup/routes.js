@@ -4,24 +4,42 @@ const compression = require("compression");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
 const users = require("../routes/users");
 const webauthnRouter = require("../routes/webauthen");
+let isProduction = require("../config");
+const secret = process.env.JWT_SECRET;
 
 module.exports = function (app) {
+  isProduction = isProduction.isProduction;
+  console.log(process.env.NODE_ENV);
   app.use(express.json());
-  // app.use(
-  //   cors({
-  //     origin: [
-  //       "http://localhost:3000",
-  //       "https://api-auth-8end.onrender.com",
-  //       "https://api-auth-8end.onrender.com/",
-  //     ],
-  //     optionsSuccessStatus: 200,
-  //   })
-  // );
-  app.use(cors());
+  app.use(
+    cors({
+      origin: isProduction
+        ? "https://www.augustiniusjosephn.social"
+        : "http://localhost:3000",
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
   app.use(bodyParser.json());
   app.use(compression());
+  app.use(cookieParser());
+  app.use(
+    session({
+      secret: secret, // replace with your own secret
+      resave: false,
+      saveUninitialized: true,
+      cookie: {
+        secure: process.env.NODE_ENV === "production", // secure in production
+        httpOnly: true,
+        sameSite: "strict",
+      },
+    })
+  ); // Add this line
   app.use(
     helmet.contentSecurityPolicy({
       directives: {

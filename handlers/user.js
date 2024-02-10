@@ -1,5 +1,6 @@
 const prisma = require("../startup/db");
-const { hashpass, generateAuthToken, comparePass } = require("../util/auth");
+const isProduction = require("../config");
+const { hashpass, comparePass } = require("../util/auth");
 const {
   sendEmailVerification,
   sendPasswordReset,
@@ -13,6 +14,7 @@ const {
 } = require("../validators/user");
 const NodeCache = require("node-cache");
 const myCache = new NodeCache();
+
 /*============================   SIGN UP ROUTES   ============================*/
 const createNewUser = async (req, res) => {
   const { error, value } = validateUser(req.body);
@@ -37,13 +39,19 @@ const createNewUser = async (req, res) => {
       password: hashedPassword,
     },
   });
-  const token = await generateAuthToken(user, "1h");
+
+  req.session.user = {
+    id: user.id,
+    role: user.role,
+    username: user.username,
+    email: user.email,
+  };
+
   sendEmailVerification(user);
 
   res.status(201).json({
     message:
       "User created successfully. Please check your email to verify your account",
-    token: token,
   });
 };
 
@@ -67,8 +75,14 @@ const verifyEmail = async (req, res) => {
       emailVerificationToken: null,
     },
   });
+  req.session.user = {
+    id: user.id,
+    role: user.role,
+    username: user.username,
+    email: user.email,
+  };
 
-  res.json({ message: "email verified" }).status(200);
+  res.status(200).json({ message: "email verified", user: req.session.user });
 };
 
 const resendEmailVerification = async (req, res) => {
@@ -89,6 +103,7 @@ const resendEmailVerification = async (req, res) => {
   res.json({ message: "email sent" }).status(200);
 };
 /*============================   SIGN IN ROUTES   ============================*/
+
 const signIn = async (req, res) => {
   const { error, value } = validateSignIn(req.body);
   if (error) return res.status(400).json({ message: error.message });
@@ -129,29 +144,38 @@ const signIn = async (req, res) => {
 
   if (!isPasswordValid) return res.status(400).json(invalidMessage);
 
-  const token = rememberMe
-    ? await generateAuthToken(user, "7d")
-    : await generateAuthToken(user);
-
-  res.status(200).json({ message: "Success", token: token });
+  req.session.user = {
+    id: user.id,
+    role: user.role,
+    username: user.username,
+    email: user.email,
+  };
+  res.status(200).json({ message: "Success", user: req.session.user });
 };
 
 const currentUser = async (req, res) => {
-  const { error, value } = validateEmail(req.body);
-  if (error) return res.status(400).json({ message: error.message });
-  const { email } = value;
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-  });
-  if (!user) return res.status(200).json({ message: "user not found" });
+  // Get the user from the session
+  const user = req.session.user;
 
-  res.status(200).json({ name: user.username, email: user.email });
+  // If there's no user in the session, return an error
+  if (!user)
+    return res.status(401).json({ message: "No user is currently logged in" });
+
+  // Return the user data
+  res.status(200).json({ message: "Success", user });
 };
 
 const signOut = async (req, res) => {
-  res.status(200).json({ message: "User logged out successfully" });
+  req.session.destroy((err) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ message: "Could not log out, please try again" });
+    } else {
+      res.clearCookie("connect.sid"); // Replace 'connect.sid' with the name of your session ID cookie if it's different
+      return res.status(200).json({ message: "User logged out successfully" });
+    }
+  });
 };
 const getUser = async (req, res) => {
   const { error, value } = validateEmail(req.body);
