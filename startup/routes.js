@@ -13,13 +13,13 @@ const secret = process.env.JWT_SECRET;
 
 module.exports = function (app) {
   isProduction = isProduction.isProduction;
-  console.log(process.env.NODE_ENV);
+
   app.use(express.json());
   app.use(
     cors({
       origin: isProduction
         ? "https://www.augustiniusjosephn.social"
-        : "http://localhost:3000",
+        : "http://localhost:3000" || "http://192.168.1.6:3000",
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -30,16 +30,16 @@ module.exports = function (app) {
   app.use(cookieParser());
   app.use(
     session({
-      secret: secret, // replace with your own secret
+      secret: secret,
       resave: false,
       saveUninitialized: true,
       cookie: {
-        secure: process.env.NODE_ENV === "production", // secure in production
+        secure: isProduction,
         httpOnly: true,
         sameSite: "strict",
       },
     })
-  ); // Add this line
+  );
   app.use(
     helmet.contentSecurityPolicy({
       directives: {

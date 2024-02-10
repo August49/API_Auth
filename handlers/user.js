@@ -1,5 +1,5 @@
 const prisma = require("../startup/db");
-const isProduction = require("../config");
+const { faker } = require("@faker-js/faker");
 const { hashpass, comparePass } = require("../util/auth");
 const {
   sendEmailVerification,
@@ -22,6 +22,7 @@ const createNewUser = async (req, res) => {
 
   const { username, email, password } = value;
   const existingUser = await prisma.user.findUnique({ where: { email } });
+
   if (existingUser) {
     return res
       .status(400)
@@ -34,17 +35,34 @@ const createNewUser = async (req, res) => {
 
   const user = await prisma.user.create({
     data: {
-      username: username,
-      email: email,
+      email,
+      username,
       password: hashedPassword,
+      accounts: {
+        create: {
+          name: faker.finance.accountName(),
+          accountNumber: faker.finance.accountNumber(16),
+          maskedAccountNumber: `XXXXX${faker.finance.accountNumber(4)}`,
+          balance: parseInt(faker.finance.amount({ min: 1000, max: 1000000 })),
+        },
+      },
+    },
+    include: {
+      accounts: true,
     },
   });
+
+  console.log(user);
 
   req.session.user = {
     id: user.id,
     role: user.role,
     username: user.username,
     email: user.email,
+    maskedAccountNumber: user.accounts[0].maskedAccountNumber,
+    accountNumber: user.accounts[0].accountNumber,
+    name: user.accounts[0].name,
+    balance: user.accounts[0].balance,
   };
 
   sendEmailVerification(user);
@@ -75,14 +93,8 @@ const verifyEmail = async (req, res) => {
       emailVerificationToken: null,
     },
   });
-  req.session.user = {
-    id: user.id,
-    role: user.role,
-    username: user.username,
-    email: user.email,
-  };
 
-  res.status(200).json({ message: "email verified", user: req.session.user });
+  res.status(200).json({ message: "email verified" });
 };
 
 const resendEmailVerification = async (req, res) => {
@@ -111,7 +123,10 @@ const signIn = async (req, res) => {
   let { email, password, rememberMe } = value;
   email = email.toLowerCase();
 
-  let user = await prisma.user.findUnique({ where: { email } });
+  let user = await prisma.user.findUnique({
+    where: { email },
+    include: { accounts: true },
+  });
   const invalidMessage = { message: "Invalid email or password." };
 
   if (!user) return res.status(400).json(invalidMessage);
@@ -149,6 +164,10 @@ const signIn = async (req, res) => {
     role: user.role,
     username: user.username,
     email: user.email,
+    maskedAccountNumber: user.accounts[0].maskedAccountNumber,
+    accountNumber: user.accounts[0].accountNumber,
+    name: user.accounts[0].name,
+    balance: user.accounts[0].balance,
   };
   res.status(200).json({ message: "Success", user: req.session.user });
 };

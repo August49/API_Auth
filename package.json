@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@faker-js/faker": "^8.4.1",
     "@prisma/client": "^5.9.1",
     "@simplewebauthn/server": "^8.3.6",
     "bcrypt": "^5.1.1",

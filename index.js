@@ -7,6 +7,8 @@ const errorHandler = require("./middleware/errorHandler");
 const routes = require("./startup/routes");
 const morgan = require("morgan");
 dotenv.config();
+const port = process.env.PORT;
+const host = process.env.HOST;
 
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
@@ -30,7 +32,8 @@ if (cluster.isMaster) {
     res.send("Hello World!");
   });
 
-  app.listen(5000, () => {
-    console.log(`Worker ${process.pid} started`);
+  app.listen(port, host, () => {
+    //host
+    console.log(`Server is running on http://${host}:${port}`);
   });
 }
