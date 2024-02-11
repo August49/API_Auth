@@ -6,14 +6,26 @@ const helmet = require("helmet");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
+const KnexSessionStore = require("connect-session-knex")(session);
 const users = require("../routes/users");
+const Knex = require("knex");
 const webauthnRouter = require("../routes/webauthen");
 let isProduction = require("../config");
 const secret = process.env.JWT_SECRET;
 
 module.exports = function (app) {
   isProduction = isProduction.isProduction;
+  const knex = Knex({
+    client: "sqlite3",
+    connection: {
+      filename: "./mydb.sqlite",
+    },
+  });
 
+  const store = new KnexSessionStore({
+    knex: knex,
+    tablename: "sessions", // optional. Defaults to 'sessions'
+  });
   app.use(express.json());
   app.use(
     cors({
@@ -32,6 +44,7 @@ module.exports = function (app) {
     session({
       secret: secret,
       resave: false,
+      store: store,
       saveUninitialized: true,
       cookie: {
         secure: isProduction,
