@@ -1,7 +1,6 @@
 const errorHandler = require("../middleware/errorHandler");
 const express = require("express");
 const compression = require("compression");
-const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -20,12 +19,14 @@ module.exports = function (app) {
     connection: {
       filename: "./mydb.sqlite",
     },
+    useNullAsDefault: true,
   });
 
   const store = new KnexSessionStore({
     knex: knex,
     tablename: "sessions", // optional. Defaults to 'sessions'
   });
+
   app.use(express.json());
   app.use(
     cors({
@@ -37,7 +38,6 @@ module.exports = function (app) {
       allowedHeaders: ["Content-Type", "Authorization"],
     })
   );
-  app.use(bodyParser.json());
   app.use(compression());
   app.use(cookieParser());
   app.use(
@@ -68,9 +68,7 @@ module.exports = function (app) {
   );
   app.use(express.urlencoded({ extended: true }));
   app.use(express.static("public"));
-  app.use(helmet());
 
-  app.use(bodyParser.json());
   app.use("/api/users", users);
   app.use("/api/webauthn", webauthnRouter);
   app.use(errorHandler);

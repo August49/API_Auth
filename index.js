@@ -32,8 +32,10 @@ if (cluster.isMaster) {
     res.send("Hello World!");
   });
 
-  app.listen(port, host, () => {
-    //host
-    console.log(`Server is running on http://${host}:${port}`);
-  });
+  if (process.env.NODE_ENV === "development") {
+    app.listen(port, host, () => {
+      //host
+      console.log(`Server is running on http://${host}:${port}`);
+    });
+  }
 }

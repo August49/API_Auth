@@ -52,8 +52,6 @@ const createNewUser = async (req, res) => {
     },
   });
 
-  console.log(user);
-
   req.session.user = {
     id: user.id,
     role: user.role,
